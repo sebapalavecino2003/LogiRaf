@@ -10,11 +10,11 @@ from .views import (
 
 router = DefaultRouter()
 
-router.register(r'categorias', CategoriaViewSet, basename='categoria')
-router.register(r'productos', ProductoViewSet, basename='producto')
-router.register(r'sectores', SectorViewSet, basename='sector')
-router.register(r'stockporsector', StockPorSectorViewSet, basename='stockporsector')
-router.register(r'stockmovimiento', StockMovimientoViewSet, basename='stockmovimiento')
+router.register(r'categorias', CategoriaViewSet)
+router.register(r'productos', ProductoViewSet)
+router.register(r'sectores', SectorViewSet)
+router.register(r'stockporsector', StockPorSectorViewSet)
+router.register(r'stockmovimiento', StockMovimientoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

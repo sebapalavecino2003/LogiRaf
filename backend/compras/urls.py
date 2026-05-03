@@ -1,18 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-   CompraViewSet,
-   DetalleCompraViewSet,
-   ComprobanteCompraViewSet
-)
+from .views import CompraViewSet
 
 router = DefaultRouter()
-
-# NOTA: Registramos de lo más específico a lo más general
-router.register(r'comprobantes', ComprobanteCompraViewSet, basename='comprobante-compra')
-router.register(r'detalles', DetalleCompraViewSet, basename='detalle-compra')
-router.register(r'crear', CompraViewSet, basename='compra-crear')
-router.register(r'', CompraViewSet, basename='compras-listado')
+router.register(r'compras', CompraViewSet, basename='compras')
 
 urlpatterns = [
     path('', include(router.urls)),

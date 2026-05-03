@@ -1,56 +1,63 @@
-# backend/inventario/services.py
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from .models import StockPorSector, Producto, Sector, StockMovimiento
+
+from .models import StockPorSector
+
 
 class StockService:
-    """Centraliza toda la lógica de stock"""
-    
+
     @staticmethod
     @transaction.atomic
-    def entrada_stock(producto: Producto, cantidad: int, sector: Sector):
-        """Registra entrada de stock"""
-        if cantidad <= 0:
-            raise ValidationError("Cantidad debe ser > 0")
-        
+    def procesar_movimiento(movimiento):
+
+        if movimiento.tipo == "entrada":
+            StockService._entrada(movimiento)
+
+        elif movimiento.tipo == "salida":
+            StockService._salida(movimiento)
+
+        elif movimiento.tipo == "transferencia":
+            StockService._transferencia(movimiento)
+
+    @staticmethod
+    def _entrada(movimiento):
         obj, _ = StockPorSector.objects.get_or_create(
-            producto=producto,
-            sector=sector,
-            defaults={'cantidad': 0}
+            producto=movimiento.producto,
+            sector=movimiento.sector_destino
         )
-        obj.cantidad += cantidad
+        obj.cantidad += movimiento.cantidad
         obj.save()
-        
-        # Registrar movimiento
-        StockMovimiento.objects.create(
-            producto=producto,
-            tipo='entrada',
-            sector_destino=sector,
-            cantidad=cantidad
-        )
-    
+
     @staticmethod
-    @transaction.atomic
-    def salida_stock(producto: Producto, cantidad: int, sector: Sector):
-        """Registra salida de stock"""
-        if cantidad <= 0:
-            raise ValidationError("Cantidad debe ser > 0")
-        
+    def _salida(movimiento):
         obj = StockPorSector.objects.get(
-            producto=producto,
-            sector=sector
+            producto=movimiento.producto,
+            sector=movimiento.sector_origen
         )
-        
-        if obj.cantidad < cantidad:
-            raise ValidationError(f"Stock insuficiente en {sector}. Disponible: {obj.cantidad}")
-        
-        obj.cantidad -= cantidad
+
+        if obj.cantidad < movimiento.cantidad:
+            raise ValidationError("Stock insuficiente")
+
+        obj.cantidad -= movimiento.cantidad
         obj.save()
-        
-        # Registrar movimiento
-        StockMovimiento.objects.create(
-            producto=producto,
-            tipo='salida',
-            sector_origen=sector,
-            cantidad=cantidad
+
+    @staticmethod
+    def _transferencia(movimiento):
+        origen = StockPorSector.objects.get(
+            producto=movimiento.producto,
+            sector=movimiento.sector_origen
         )
+
+        if origen.cantidad < movimiento.cantidad:
+            raise ValidationError("Stock insuficiente")
+
+        destino, _ = StockPorSector.objects.get_or_create(
+            producto=movimiento.producto,
+            sector=movimiento.sector_destino
+        )
+
+        origen.cantidad -= movimiento.cantidad
+        destino.cantidad += movimiento.cantidad
+
+        origen.save()
+        destino.save()

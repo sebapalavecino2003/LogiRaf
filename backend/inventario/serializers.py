@@ -1,10 +1,13 @@
 from rest_framework import serializers
 from .models import Producto, Categoria, Sector, StockPorSector, StockMovimiento
+from .services import StockService
+
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
         fields = '__all__'
+
 
 class ProductoSerializer(serializers.ModelSerializer):
     categoria = CategoriaSerializer(read_only=True)
@@ -27,7 +30,6 @@ class ProductoSerializer(serializers.ModelSerializer):
             'categoria',
             'id_categoria'
         ]
-
 
 
 class SectorSerializer(serializers.ModelSerializer):
@@ -101,3 +103,11 @@ class StockMovimientoSerializer(serializers.ModelSerializer):
             'id_sector_destino',
             'fecha'
         ]
+
+    def create(self, validated_data):
+        movimiento = StockMovimiento.objects.create(**validated_data)
+
+        # 🔥 lógica en service
+        StockService.procesar_movimiento(movimiento)
+
+        return movimiento

@@ -1,8 +1,7 @@
 from django.db import models
-from usuarios.models import Usuario
-from inventario.models import Producto
 from django.conf import settings
 from inventario.models import Producto
+
 
 class Compra(models.Model):
     id_compra = models.AutoField(primary_key=True)
@@ -16,13 +15,15 @@ class Compra(models.Model):
     )
 
     def __str__(self):
-        return f"Compra {self.id_compra} - {self.responsable_abastecimiento.username}"
+        return f"Compra {self.id_compra}"
+
 
 class DetalleCompra(models.Model):
     compra = models.ForeignKey(Compra, related_name='detalles', on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=4)
+
 
 class ComprobanteCompra(models.Model):
     compra = models.OneToOneField(Compra, related_name='comprobante_detalle', on_delete=models.CASCADE)

@@ -1,5 +1,4 @@
 # Ignorar frontend completo
-frontend/
 
 # Node (por si hay cosas sueltas)
 node_modules/

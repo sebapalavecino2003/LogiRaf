@@ -1,64 +1,50 @@
-# backend/compras/services.py
 from django.db import transaction
-from django.core.exceptions import ValidationError
-from rest_framework import serializers
-from .models import Compra, DetalleCompra, ComprobanteCompra
-from inventario.models import Sector
-from inventario.services import StockService
 import uuid
 
+from .models import Compra, DetalleCompra, ComprobanteCompra
+from inventario.models import Sector, StockMovimiento
+
+
 class CompraService:
-    """Lógica de negocio de compras"""
-    
+
     @staticmethod
     @transaction.atomic
-    def crear_compra(responsable, items_data):
+    def crear_compra(data, detalles_data):
         """
-        items_data = [
-            {'producto': Producto, 'cantidad': int, 'precio_unitario': Decimal}
-        ]
+        Orquesta toda la lógica de compra
         """
-        # 1. Validar que todos los productos existan
-        for item in items_data:
-            if not item['producto'].id_producto:
-                raise ValidationError("Producto no válido")
-        
-        # 2. Crear cabecera
-        total = sum(item['cantidad'] * item['precio_unitario'] for item in items_data)
-        
-        compra = Compra.objects.create(
-            responsable_abastecimiento=responsable,
-            total_compra=total
-        )
-        
-        # 3. Crear comprobante
-        ticket_nro = f"CMP-{uuid.uuid4().hex[:6].upper()}"
-        ComprobanteCompra.objects.create(
+
+        # 1. Crear compra
+        compra = Compra.objects.create(**data)
+
+        # 2. Crear comprobante
+        comprobante = ComprobanteCompra.objects.create(
             compra=compra,
-            numero_comprobante=ticket_nro
+            numero_comprobante=f"CMP-{uuid.uuid4().hex[:6].upper()}"
         )
-        
-        # 4. Procesar detalles y stock
-        sector_deposito = Sector.objects.get(tipo='DEPOSITO')
-        
-        for item in items_data:
-            producto = item['producto']
-            cantidad = item['cantidad']
-            precio = item['precio_unitario']
-            
-            # Crear detalle
+
+        # 3. Obtener sector depósito
+        deposito = Sector.objects.get(tipo='DEPOSITO')
+
+        # 4. Procesar detalles
+        for detalle in detalles_data:
+            producto = detalle['producto']
+            cantidad = detalle['cantidad']
+
+            # A. Crear detalle
             DetalleCompra.objects.create(
                 compra=compra,
                 producto=producto,
                 cantidad=cantidad,
-                precio_unitario=precio
+                precio_unitario=detalle['precio_unitario']
             )
-            
-            # Actualizar stock mediante servicio
-            StockService.entrada_stock(
+
+            # B. Generar movimiento de stock (🔥 clave)
+            StockMovimiento.objects.create(
                 producto=producto,
-                cantidad=cantidad,
-                sector=sector_deposito
+                tipo="entrada",
+                sector_destino=deposito,
+                cantidad=cantidad
             )
-        
+
         return compra

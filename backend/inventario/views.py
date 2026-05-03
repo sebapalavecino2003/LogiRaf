@@ -1,5 +1,4 @@
-# backend/inventario/views.py
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from .models import (
     Producto,
     Categoria,
@@ -7,6 +6,7 @@ from .models import (
     StockPorSector,
     StockMovimiento
 )
+
 from .serializers import (
     CategoriaSerializer,
     ProductoSerializer,
@@ -15,36 +15,27 @@ from .serializers import (
     StockMovimientoSerializer
 )
 
+
 class CategoriaViewSet(viewsets.ModelViewSet):
-    """Gestión de categorías"""
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
+
 class ProductoViewSet(viewsets.ModelViewSet):
-    """Gestión de productos - solo lectura de stock desde StockPorSector"""
-    queryset = Producto.objects.select_related('categoria').prefetch_related(
-        'stockporsector_set__sector'
-    )
+    queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
 
-class SectorViewSet(viewsets.ReadOnlyModelViewSet):
-    """Los sectores son datos maestros, no se crean por API"""
+
+class SectorViewSet(viewsets.ModelViewSet):
     queryset = Sector.objects.all()
     serializer_class = SectorSerializer
 
-class StockPorSectorViewSet(viewsets.ReadOnlyModelViewSet):
-    """Solo lectura - el stock se modifica a través de operaciones (compras/ventas)"""
-    queryset = StockPorSector.objects.select_related(
-        'producto__categoria',
-        'sector'
-    )
+
+class StockPorSectorViewSet(viewsets.ModelViewSet):
+    queryset = StockPorSector.objects.all()
     serializer_class = StockPorSectorSerializer
 
-class StockMovimientoViewSet(viewsets.ReadOnlyModelViewSet):
-    """Auditoría de movimientos de stock - solo lectura"""
-    queryset = StockMovimiento.objects.select_related(
-        'producto',
-        'sector_origen',
-        'sector_destino'
-    )
+
+class StockMovimientoViewSet(viewsets.ModelViewSet):
+    queryset = StockMovimiento.objects.all()
     serializer_class = StockMovimientoSerializer
