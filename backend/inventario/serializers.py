@@ -4,14 +4,17 @@ from .services import StockService
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
+    """Serializador para las categorías de productos."""
+
     class Meta:
         model = Categoria
         fields = '__all__'
 
 
 class ProductoSerializer(serializers.ModelSerializer):
-    categoria = CategoriaSerializer(read_only=True)
+    """Serializador para productos, con categoría incrustada en lectura."""
 
+    categoria = CategoriaSerializer(read_only=True)
     id_categoria = serializers.PrimaryKeyRelatedField(
         queryset=Categoria.objects.all(),
         source='categoria',
@@ -33,12 +36,16 @@ class ProductoSerializer(serializers.ModelSerializer):
 
 
 class SectorSerializer(serializers.ModelSerializer):
+    """Serializador para los sectores del inventario."""
+
     class Meta:
         model = Sector
         fields = '__all__'
 
 
 class StockPorSectorSerializer(serializers.ModelSerializer):
+    """Serializador que muestra stock por producto y sector."""
+
     producto = ProductoSerializer(read_only=True)
     sector = SectorSerializer(read_only=True)
 
@@ -107,7 +114,6 @@ class StockMovimientoSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         movimiento = StockMovimiento.objects.create(**validated_data)
 
-        # 🔥 lógica en service
         StockService.procesar_movimiento(movimiento)
 
         return movimiento

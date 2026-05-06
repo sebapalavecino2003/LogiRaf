@@ -1,16 +1,11 @@
-"""
-WSGI config for config project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
-"""
+"""Configuración WSGI para el proyecto Django."""
 
 import os
 
 from django.core.wsgi import get_wsgi_application
 
+# Define el módulo de configuración que Django debe usar.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
+# Objeto WSGI usado por servidores de aplicaciones compatibles con WSGI.
 application = get_wsgi_application()

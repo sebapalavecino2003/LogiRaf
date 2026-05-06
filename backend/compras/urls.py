@@ -4,6 +4,7 @@ from .views import CompraViewSet
 
 router = DefaultRouter()
 router.register(r'compras', CompraViewSet, basename='compras')
+# El enrutador registra el ViewSet para exponer rutas CRUD en /compras/.
 
 urlpatterns = [
     path('', include(router.urls)),

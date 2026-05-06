@@ -5,10 +5,12 @@ from .models import StockPorSector
 
 
 class StockService:
+    """Servicio de negocio para actualizar el stock según el tipo de movimiento."""
 
     @staticmethod
     @transaction.atomic
     def procesar_movimiento(movimiento):
+        """Aplica el movimiento de stock dentro de una transacción segura."""
 
         if movimiento.tipo == "entrada":
             StockService._entrada(movimiento)
@@ -27,6 +29,7 @@ class StockService:
         )
         obj.cantidad += movimiento.cantidad
         obj.save()
+        # Aumenta el stock en el sector destino cuando entra mercadería.
 
     @staticmethod
     def _salida(movimiento):
@@ -40,6 +43,7 @@ class StockService:
 
         obj.cantidad -= movimiento.cantidad
         obj.save()
+        # Resta stock del sector origen al registrar una salida.
 
     @staticmethod
     def _transferencia(movimiento):
@@ -61,3 +65,4 @@ class StockService:
 
         origen.save()
         destino.save()
+        # Mueve la cantidad entre sectores asegurando consistencia del inventario.

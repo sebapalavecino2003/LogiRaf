@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 
 
 class Categoria(models.Model):
+    """Categoría de productos para agrupar artículos de inventario."""
+
     id_categoria = models.AutoField(primary_key=True)
     nombre_categoria = models.CharField(max_length=100)
 
@@ -11,6 +13,8 @@ class Categoria(models.Model):
 
 
 class Producto(models.Model):
+    """Define un producto con sus atributos básicos y su categoría."""
+
     id_producto = models.AutoField(primary_key=True)
     nombre_producto = models.CharField(max_length=200)
     marca = models.CharField(max_length=100)
@@ -18,12 +22,15 @@ class Producto(models.Model):
     descripcion_producto = models.TextField(blank=True, null=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=4)
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
+    # Se usa PROTECT para impedir eliminar una categoría que todavía tenga productos.
 
     def __str__(self):
         return self.nombre_producto
 
 
 class Sector(models.Model):
+    """Define un sector del inventario donde se puede ubicar el stock."""
+
     SECTORES_CHOICES = [
         ('DEPOSITO', 'Depósito'),
         ('SALON', 'Salón de ventas'),
@@ -37,15 +44,20 @@ class Sector(models.Model):
 
 
 class StockPorSector(models.Model):
+    """Mantiene la cantidad disponible de un producto en un sector específico."""
+
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
 
     class Meta:
         unique_together = ('producto', 'sector')
+        # La combinación de producto y sector debe ser única.
 
 
 class StockMovimiento(models.Model):
+    """Registra entradas, salidas y transferencias de inventario."""
+
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
 
     tipo = models.CharField(max_length=20, choices=[
@@ -79,3 +91,4 @@ class StockMovimiento(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+        # Validación explícita antes de guardar el movimiento de stock.

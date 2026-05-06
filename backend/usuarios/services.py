@@ -5,6 +5,7 @@ Usuario = get_user_model()
 
 
 class UsuarioService:
+    """Servicio de negocio para crear y validar usuarios."""
 
     @staticmethod
     def crear_usuario(data):

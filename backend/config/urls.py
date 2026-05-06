@@ -6,16 +6,17 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+# Rutas principales del proyecto.
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),  # Interfaz de administración de Django.
 
-    # Auth
+    # Autenticación JWT.
     path('api/auth/login/', TokenObtainPairView.as_view()),
     path('api/auth/refresh/', TokenRefreshView.as_view()),
 
-    # Apps (versionadas)
-    path('api/v1/usuarios/', include('usuarios.urls')),
-    path('api/v1/inventario/', include('inventario.urls')),
-    path('api/v1/ventas/', include('ventas.urls')),
-    path('api/v1/compras/', include('compras.urls')),
+    # APIs de las aplicaciones del sistema.
+    path('api/usuarios/', include('usuarios.urls')),
+    path('api/inventario/', include('inventario.urls')),
+    path('api/ventas/', include('ventas.urls')),
+    path('api/compras/', include('compras.urls')),
 ]
