@@ -1,5 +1,6 @@
 """Configuración principal del proyecto Django."""
 
+import os
 from pathlib import Path
 
 # BASE_DIR apunta al directorio raíz del proyecto backend.
@@ -17,7 +18,7 @@ SECRET_KEY = 'django-insecure-8x_xoixft_ogbzij(yy89bz213&pqe^s@g4n&e6y8pbbj435w1
 DEBUG = True
 
 # Hosts permitidos para acceder al servidor.
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # -------------------------------------------------------------
 # Aplicaciones instaladas
@@ -81,8 +82,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # -------------------------------------------------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQL_DATABASE', 'logiraf'),
+        'USER': os.getenv('MYSQL_USER', 'logiraf'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'logiraf_dev'),
+        'HOST': os.getenv('MYSQL_HOST', 'localhost'),
+        'PORT': os.getenv('MYSQL_PORT', '3306'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -110,6 +118,12 @@ USE_TZ = True
 # Archivos estáticos y CORS
 # -------------------------------------------------------------
 STATIC_URL = 'static/'
+
+FRONTEND_DIST = BASE_DIR.parent / 'frontend' / 'dist'
+if FRONTEND_DIST.exists():
+    STATICFILES_DIRS = [FRONTEND_DIST]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 CORS_ALLOW_ALL_ORIGINS = True  # Permite el acceso desde cualquier frontend.
 
 # -------------------------------------------------------------
